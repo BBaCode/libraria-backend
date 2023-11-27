@@ -1,4 +1,22 @@
-import { getDatabase, ref, get } from "firebase/database";
+import { getDatabase, ref, get, set } from "firebase/database";
+
+import { initializeApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAVU9fB1VueBzPiF7jFn0-5O3V4BAQ-EL0",
+  authDomain: "libraria-732ca.firebaseapp.com",
+  projectId: "libraria-732ca",
+  storageBucket: "libraria-732ca.appspot.com",
+  messagingSenderId: "115290080062",
+  appId: "1:115290080062:web:d24a2ccd8faceaa3ca226f",
+  measurementId: "G-5ZBYF76BTN",
+};
+
+const fbapp = initializeApp(firebaseConfig);
+
+const auth = getAuth(fbapp);
 
 const getAllUsers = async (req, res) => {
   try {
@@ -18,4 +36,24 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-export { getAllUsers };
+const writeNewUser = async (req, res) => {
+  try {
+    let userInformation = req.body;
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      userInformation.email,
+      userInformation.password
+    );
+
+    // User successfully created
+    const user = userCredential.user;
+    res.send("User successfully created");
+    console.log(user);
+  } catch (error) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    res.status(errorCode).send(errorMessage);
+  }
+};
+
+export { getAllUsers, writeNewUser };
