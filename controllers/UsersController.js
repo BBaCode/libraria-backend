@@ -1,7 +1,13 @@
 import { getDatabase, ref, get, set } from "firebase/database";
 
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -56,4 +62,34 @@ const writeNewUser = async (req, res) => {
   }
 };
 
-export { getAllUsers, writeNewUser };
+const loginUser = async (req, res) => {
+  let userInformation = req.body;
+  signInWithEmailAndPassword(
+    auth,
+    userInformation.email,
+    userInformation.password
+  )
+    .then((userCredential) => {
+      // Signed in
+      const user = userCredential.user;
+      res.status(200).send("Login Successful");
+      console.log(user);
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      res.send(errorMessage);
+    });
+};
+
+const signOutUser = async (req, res) => {
+  signOut(auth)
+    .then(() => {
+      // Sign-out successful.
+    })
+    .catch((error) => {
+      // An error happened.
+    });
+};
+
+export { getAllUsers, writeNewUser, loginUser };
