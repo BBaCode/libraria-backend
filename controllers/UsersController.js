@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  updateProfile,
 } from "firebase/auth";
 
 // Firebase configuration
@@ -53,7 +54,20 @@ const writeNewUser = async (req, res) => {
 
     // User successfully created
     const user = userCredential.user;
-    res.send("User successfully created");
+    await updateProfile(user, {
+      displayName: userInformation.displayName,
+    })
+      .then(() => {
+        console.log("Name added: " + userInformation.displayName);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    const detailsSent = {
+      displayName: user.displayName,
+      email: user.email,
+    };
+    res.json(detailsSent);
     console.log(user);
   } catch (error) {
     const errorCode = error.code;
@@ -72,7 +86,11 @@ const loginUser = async (req, res) => {
     .then((userCredential) => {
       // Signed in
       const user = userCredential.user;
-      res.status(200).send("Login Successful");
+      const detailsSent = {
+        id: user.uid,
+        email: user.email,
+      };
+      res.status(200).json(detailsSent);
       console.log(user);
     })
     .catch((error) => {
@@ -82,14 +100,14 @@ const loginUser = async (req, res) => {
     });
 };
 
-const signOutUser = async (req, res) => {
+const logoutUser = async (req, res) => {
   signOut(auth)
     .then(() => {
-      // Sign-out successful.
+      res.send("user signed out");
     })
     .catch((error) => {
-      // An error happened.
+      res.send(error);
     });
 };
 
-export { getAllUsers, writeNewUser, loginUser };
+export { getAllUsers, writeNewUser, loginUser, logoutUser };

@@ -14,7 +14,4 @@ app.listen(4500, () => {
 
 app.use("/users", userRouter);
 
-// Initialize Firebas
-
-// writeUserData("ID2", "caroline", "caroline@gmail.com");
 // const analytics = getAnalytics(app);
