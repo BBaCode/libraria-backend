@@ -87,7 +87,7 @@ const loginUser = async (req, res) => {
       // Signed in
       const user = userCredential.user;
       const detailsSent = {
-        id: user.uid,
+        displayName: user.displayName,
         email: user.email,
       };
       res.status(200).json(detailsSent);
