@@ -1,4 +1,4 @@
-import { getDatabase, ref, get, set } from "firebase/database";
+import { getDatabase, ref, get, set, child } from "firebase/database";
 import { v4 } from "uuid";
 
 import { initializeApp } from "firebase/app";
@@ -29,15 +29,18 @@ const auth = getAuth(fbapp);
 const getAllUsers = async (req, res) => {
   try {
     const dbRef = ref(getDatabase());
-    const snapshot = await get(dbRef, "users");
-
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      res.json({ data });
-    } else {
-      console.log("No data available");
-      res.json({ data: null }); // or handle the case when no data is available
-    }
+    await get(child(dbRef, `users/`))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          console.log(snapshot.val());
+          res.send(snapshot.val());
+        } else {
+          console.log("No data available");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

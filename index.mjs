@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { router as userRouter } from "./routes/users.js";
+import { router as libraryRouter } from "./routes/library.js";
 // import { getAnalytics } from "firebase/analytics";
 
 const app = express();
@@ -13,5 +14,6 @@ app.listen(4500, () => {
 });
 
 app.use("/users", userRouter);
+app.use("/library", libraryRouter);
 
 // const analytics = getAnalytics(app);
