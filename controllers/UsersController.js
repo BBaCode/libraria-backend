@@ -1,4 +1,5 @@
 import { getDatabase, ref, get, set } from "firebase/database";
+import { v4 } from "uuid";
 
 import { initializeApp } from "firebase/app";
 import {
@@ -54,6 +55,8 @@ const writeNewUser = async (req, res) => {
 
     // User successfully created
     const user = userCredential.user;
+
+    // Update user with a displayname
     await updateProfile(user, {
       displayName: userInformation.displayName,
     })
@@ -63,6 +66,20 @@ const writeNewUser = async (req, res) => {
       .catch((error) => {
         console.log(error);
       });
+
+    // create library for user
+    const userId = user.uid;
+    const db = getDatabase();
+    set(ref(db, "libraries/" + userId), {
+      books: { 1: "example" },
+    });
+    // create user in a userdb
+    set(ref(db, "users/" + userId), {
+      displayName: user.displayName,
+      email: user.email,
+    });
+
+    //details to be sent to the client
     const detailsSent = {
       displayName: user.displayName,
       email: user.email,
@@ -72,7 +89,7 @@ const writeNewUser = async (req, res) => {
   } catch (error) {
     const errorCode = error.code;
     const errorMessage = error.message;
-    res.status(errorCode).send(errorMessage);
+    res.status(500).send(errorMessage);
   }
 };
 
