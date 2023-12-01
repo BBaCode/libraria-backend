@@ -50,8 +50,9 @@ const writeNewBook = async (req, res) => {
   const user = auth.currentUser;
   const userId = user.uid;
   const db = getDatabase();
-  set(ref(db, "libraries/" + userId), {
-    id: bookInfo.id,
+  set(ref(db, "libraries/" + userId + "/" + bookInfo.id), {
+    title: bookInfo.title,
+    authors: bookInfo.authors,
   });
 
   if (bookInfo.authors) {
