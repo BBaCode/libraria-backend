@@ -25,7 +25,7 @@ const firebaseConfig = {
 const fbapp = initializeApp(firebaseConfig);
 
 const auth = getAuth(fbapp);
-
+// DATA IS DENORMALIZED, NEED TO TAKE TH LIBRARY AND THEN GRAB ALL THE BOOKS BASED ON IDs
 const getAllLibaries = async (req, res) => {
   try {
     const dbRef = ref(getDatabase());
@@ -45,6 +45,28 @@ const getAllLibaries = async (req, res) => {
   }
 };
 
-const writeNewBook = async (req, res) => {};
+const writeNewBook = async (req, res) => {
+  const bookInfo = req.body;
+  const user = auth.currentUser;
+  const userId = user.uid;
+  const db = getDatabase();
+  set(ref(db, "libraries/" + userId), {
+    id: bookInfo.id,
+  });
 
-export { getAllLibaries };
+  if (bookInfo.authors) {
+    set(ref(db, "books/" + bookInfo.id), {
+      title: bookInfo.title,
+      authors: bookInfo.authors,
+    });
+  } else {
+    set(ref(db, "books/" + bookInfo.id), {
+      title: bookInfo.title,
+      authors: "unknown",
+    });
+  }
+
+  res.send(bookInfo);
+};
+
+export { getAllLibaries, writeNewBook };

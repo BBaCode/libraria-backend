@@ -73,9 +73,9 @@ const writeNewUser = async (req, res) => {
     // create library for user
     const userId = user.uid;
     const db = getDatabase();
-    set(ref(db, "libraries/" + userId), {
-      books: { 1: "example" },
-    });
+    // set(ref(db, "libraries/" + userId), {
+    //   books: { 1: "example" },
+    // });
     // create user in a userdb
     set(ref(db, "users/" + userId), {
       displayName: user.displayName,
