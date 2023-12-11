@@ -1,3 +1,5 @@
+// this version works by passing the actual familyID
+
 import {
   getDatabase,
   ref,
@@ -83,19 +85,37 @@ const writeNewParentUser = async (req, res) => {
 
     const userId = user.uid;
     const db = getDatabase();
-    const familyID = v4();
     // create user in a userdb
     set(ref(db, "users/" + userId), {
       displayName: user.displayName,
       email: user.email,
-      familyID,
-    });
+      familyID: user.email,
+    })
+      .then(() => {
+        console.log("user added to users db");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    const familyID = v4();
 
     set(ref(db, `families/${familyID}`), {
       familyName: userInformation.familyAccount,
-    });
+    })
+      .then(() => {
+        console.log("user added to family db");
+      })
+      .catch(() => {
+        console.log("Error adding user to families db");
+      });
 
-    set(ref(db, `families/${familyID}/members/${user.uid}`), true);
+    set(ref(db, `families/${familyID}/members/${user.uid}`), true)
+      .then(() => {
+        console.log("user added to family members db");
+      })
+      .catch((error) => {
+        console.log("user not added to family members db");
+      });
 
     //details to be sent to the client
     const detailsSent = {
@@ -115,75 +135,47 @@ const writeNewChildUser = async (req, res) => {
   try {
     const db = getDatabase();
     const userInformation = req.body;
-    const parentEmail = userInformation.parentEmail;
     const kidGenEmail = userInformation.username + "@libraria.com";
 
     // Step 1: Find parent's user ID using the provided parent's email
-    const parentRef = ref(db, "users");
-    let famID = "";
-    await onValue(parentRef, (snapshot) => {
-      snapshot.forEach((childSnapshot) => {
-        if (childSnapshot.val().email === parentEmail) {
-          famID = childSnapshot.val().familyID;
-        }
-      });
-    });
-
-    if (famID.length > 1) {
+    const libRef = ref(db, "families");
+    if ((await get(libRef)).hasChild(userInformation.familyID)) {
       const childCredential = await createUserWithEmailAndPassword(
         auth,
         kidGenEmail,
         userInformation.password
       );
-      const childUser = await childCredential.user;
+      const childUser = childCredential.user;
 
       // Update child user's display name
       await updateProfile(childUser, {
         displayName: userInformation.displayName,
       });
 
-      // Add the child to user database
-
+      // Step 4: Add the child to the family
+      await set(
+        ref(
+          db,
+          "families/" + userInformation.familyID + "/members/" + childUser.uid
+        ),
+        true
+      );
+      console.log("Child added to the family successfully");
       await set(ref(db, "users/" + childUser.uid), {
         displayName: userInformation.displayName,
         email: kidGenEmail,
-        familyID: famID,
-      })
-        .then(() => {
-          console.log("Child user created successfully");
-        })
-        .catch(() => {
-          console.log("Error creating the user");
-        });
-
-      //  Add the child to the family
-      await set(
-        ref(db, "families/" + famID + "/members/" + childUser.uid),
-        true
-      )
-        .then(() => {
-          console.log(`User added to family successfully`);
-        })
-        .catch(() => {
-          console.log("Error adding user to family");
-        });
-
-      console.log("Child signup successful");
+        familyID: userInformation.familyID,
+      });
+      console.log("Child added to the users successfully");
 
       // Respond with success or other details
-      res.status(200).json({
-        displayName: childUser.displayName,
-        // send email as username for kids
-        email: userInformation.username,
-      });
+      res.status(200).send("Child Login Complete");
     } else {
-      res.status(404).json({
-        message: "Hmm, we can't seem to find that email in our system.",
-      });
+      throw Error("Parent email does not exist");
     }
   } catch (error) {
     const errorMessage = error.message;
-    // const errorCode = error.code;
+    console.error(errorMessage);
     res.status(500).send(errorMessage);
   }
 };
