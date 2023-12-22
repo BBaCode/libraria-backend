@@ -58,6 +58,59 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const writeNewGoogleUser = async (req, res) => {
+  try {
+    const user = req.body;
+    const userId = user.id;
+    const db = getDatabase();
+    const familyID = v4();
+    // create user in a userdb
+    set(ref(db, "users/" + userId), {
+      displayName: user.displayName,
+      email: user.email,
+    });
+
+    //details to be sent to the client
+    const detailsSent = {
+      displayName: user.displayName,
+      email: user.email,
+    };
+    res.json(detailsSent);
+    console.log(user);
+  } catch (error) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    res.status(500).send(errorMessage);
+  }
+};
+
+const writeNewUser = async (req, res) => {
+  try {
+    const user = req.body;
+    const userId = user.id;
+    const db = getDatabase();
+    const familyID = v4();
+    // create user in a userdb
+    set(ref(db, "users/" + userId), {
+      displayName: user.displayName,
+      email: user.email,
+      familyID,
+    });
+
+    //details to be sent to the client
+    const detailsSent = {
+      displayName: user.displayName,
+      email: user.email,
+    };
+    res.json(detailsSent);
+    console.log(user);
+  } catch (error) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    res.status(500).send(errorMessage);
+  }
+};
+
 const writeNewParentUser = async (req, res) => {
   try {
     let userInformation = req.body;
@@ -208,7 +261,9 @@ const loginUser = async (req, res) => {
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
-      res.send(errorMessage);
+      res.send(
+        "We cannot find the account with those credentials. Please try again."
+      );
     });
 };
 
@@ -224,6 +279,8 @@ const logoutUser = async (req, res) => {
 
 export {
   getAllUsers,
+  writeNewUser,
+  writeNewGoogleUser,
   writeNewParentUser,
   writeNewChildUser,
   loginUser,

@@ -26,19 +26,18 @@ const fbapp = initializeApp(firebaseConfig);
 
 const auth = getAuth(fbapp);
 // DATA IS DENORMALIZED, NEED TO TAKE TH LIBRARY AND THEN GRAB ALL THE BOOKS BASED ON IDs
-const getAllLibaries = async (req, res) => {
+const getLibrary = async (req, res) => {
   try {
+    const userId = req.body.userId; // Get user ID from the request body
     const dbRef = ref(getDatabase());
-    await get(child(dbRef, `libraries/` + auth.currentUser.uid)).then(
-      (snapshot) => {
-        if (snapshot.exists()) {
-          console.log(snapshot.val());
-          res.send(snapshot.val());
-        } else {
-          console.log("No data available");
-        }
+    await get(child(dbRef, `libraries/` + userId)).then((snapshot) => {
+      if (snapshot.exists()) {
+        console.log(snapshot.val());
+        res.send(snapshot.val());
+      } else {
+        console.log("No data available");
       }
-    );
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -46,28 +45,25 @@ const getAllLibaries = async (req, res) => {
 };
 
 const writeNewBook = async (req, res) => {
-  const bookInfo = req.body;
-  const user = auth.currentUser;
-  const userId = user.uid;
+  const bookInfo = req.body.volumeInfo;
+  const bookId = req.body.id;
+  const userId = req.body.userId;
   const db = getDatabase();
-  set(ref(db, "libraries/" + userId + "/" + bookInfo.id), {
-    title: bookInfo.title,
-    authors: bookInfo.authors,
+  set(ref(db, "libraries/" + userId + "/" + bookId), {
+    volumeInfo: bookInfo,
   });
 
   if (bookInfo.authors) {
-    set(ref(db, "books/" + bookInfo.id), {
-      title: bookInfo.title,
-      authors: bookInfo.authors,
+    set(ref(db, "books/" + bookId), {
+      volumeInfo: bookInfo,
     });
   } else {
-    set(ref(db, "books/" + bookInfo.id), {
-      title: bookInfo.title,
-      authors: "unknown",
+    set(ref(db, "books/" + bookId), {
+      volumeInfo: bookInfo,
     });
   }
 
   res.send(bookInfo);
 };
 
-export { getAllLibaries, writeNewBook };
+export { getLibrary, writeNewBook };
