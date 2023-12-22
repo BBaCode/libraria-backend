@@ -25,7 +25,7 @@ const firebaseConfig = {
 const fbapp = initializeApp(firebaseConfig);
 
 const auth = getAuth(fbapp);
-// DATA IS DENORMALIZED, NEED TO TAKE TH LIBRARY AND THEN GRAB ALL THE BOOKS BASED ON IDs
+// DATA IS DENORMALIZED, NEED TO TAKE TH LIBRARY AND THEN GRAB ALL THE BOOKS BASED ON ID
 const getLibrary = async (req, res) => {
   try {
     const userId = req.body.userId; // Get user ID from the request body
