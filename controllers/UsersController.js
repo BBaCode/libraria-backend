@@ -63,7 +63,6 @@ const writeNewGoogleUser = async (req, res) => {
     const user = req.body;
     const userId = user.id;
     const db = getDatabase();
-    const familyID = v4();
     // create user in a userdb
     set(ref(db, "users/" + userId), {
       displayName: user.displayName,

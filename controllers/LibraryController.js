@@ -49,8 +49,12 @@ const writeNewBook = async (req, res) => {
   const bookId = req.body.id;
   const userId = req.body.userId;
   const db = getDatabase();
+  const date = new Date();
+  const dateAdded = date.toLocaleDateString("en-US");
+  console.log(dateAdded);
   set(ref(db, "libraries/" + userId + "/" + bookId), {
     volumeInfo: bookInfo,
+    dateAdded: dateAdded,
   });
 
   if (bookInfo.authors) {
@@ -62,8 +66,7 @@ const writeNewBook = async (req, res) => {
       volumeInfo: bookInfo,
     });
   }
-
-  res.send(bookInfo);
+  res.send(dateAdded);
 };
 
 export { getLibrary, writeNewBook };
